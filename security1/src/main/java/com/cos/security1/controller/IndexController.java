@@ -3,6 +3,8 @@ package com.cos.security1.controller;
 import com.cos.security1.Repository.UserRepository;
 import com.cos.security1.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,8 +65,19 @@ public class IndexController {
         String rawPassword = user.getPassword();
         String encPassword = bCryptPasswordEncoder.encode(rawPassword);
         user.setPassword(encPassword);
-        user.setRole("ROLE_USER");
         userRepository.save(user);
         return "redirect:/loginForm"; // rediect가 붙으면 loginform함수실행
+    }
+
+    @Secured("ROLE_ADMIN")
+    @GetMapping("/info")
+    public @ResponseBody String info(){
+        return "개인정보";
+    }
+
+    @PreAuthorize("hasRole('ROLE_MANAGER') or hasRole('ROLE_ADMIN')") //함수가 실행 직전에 실행되서, 권한 먼저 확인하는 것!
+    @GetMapping("/data")
+    public @ResponseBody String data(){
+        return "데이터정보";
     }
 }
